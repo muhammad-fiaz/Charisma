@@ -1,9 +1,18 @@
-# 🧠 Charisma - Personal Memory Clone
+<div align="center">
+
+# 🧠 Charisma - Clone Yourself
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: AGPL](https://img.shields.io/badge/License-AGPL-yellow.svg)](https://opensource.org/licenses/AGPL-3.0)
 [![Built with Unsloth](https://img.shields.io/badge/Built%20with-Unsloth-orange)](https://github.com/unslothai/unsloth)
 [![Powered by Gradio](https://img.shields.io/badge/Powered%20by-Gradio-yellow)](https://www.gradio.app/)
+[![Last Commit](https://img.shields.io/github/last-commit/muhammad-fiaz/Charisma?color=blue)](https://github.com/muhammad-fiaz/Charisma/commits/main)
+[![Open Issues](https://img.shields.io/github/issues/muhammad-fiaz/Charisma?color=red)](https://github.com/muhammad-fiaz/Charisma/issues)
+[![Pull Requests](https://img.shields.io/github/issues-pr/muhammad-fiaz/Charisma?color=green)](https://github.com/muhammad-fiaz/Charisma/pulls)
+[![License](https://img.shields.io/github/license/muhammad-fiaz/Charisma?color=lightgrey)](https://github.com/muhammad-fiaz/Charisma/blob/main/LICENSE)
+
+</div>
+
 
 **Clone your memory and personality using AI** - A fully local application that fine-tunes large language models on your personal memories from Notion to create an AI representation of yourself.
 
@@ -414,7 +423,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the AGPL License - see the [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
