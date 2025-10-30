@@ -1,0 +1,98 @@
+# Charisma Configuration (generated at runtime)
+charisma.toml
+
+# Logs
+logs/
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# PyCharm
+.idea/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# PyTest
+.pytest_cache/
+.coverage
+htmlcov/
+
+# MyPy
+.mypy_cache/
+.dmycp.json
+dmypy.json
+
+# Ruff
+.ruff_cache/
+
+# UV
+.uv/
+uv.lock
+
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Models and Data
+models/
+*.pth
+*.pt
+*.bin
+*.safetensors
+datasets/
+
+# Local Memory Cache
+data/
+
+# Notion Cache
+.notion_cache/
+
+# HuggingFace Cache
+.cache/
+
+# Training Outputs
+outputs/
+checkpoints/
+runs/
+wandb/
+unsloth_compiled_cache
+.gradio
