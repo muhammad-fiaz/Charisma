@@ -87,6 +87,11 @@ charisma = "charisma.main:main"
 
 [tool.uv.pip]
 output-file = "requirements.txt"
+universal = true
+no-strip-markers = true
+no-strip-extras = true
+verify-hashes = true
+require-hashes = true
 
 [tool.uv.extra-build-dependencies]
 xformers = ["torch", "ninja"]
@@ -105,6 +110,8 @@ xformers = { index = "pytorch-cu129" }
 [tool.uv]
 package = true
 managed = true
+environments = ["sys_platform != 'darwin'"]
+
 
 [tool.uv.build-backend]
 module-name = "charisma"

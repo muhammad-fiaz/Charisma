@@ -10,6 +10,7 @@
 [![Open Issues](https://img.shields.io/github/issues/muhammad-fiaz/Charisma?color=red)](https://github.com/muhammad-fiaz/Charisma/issues)
 [![Pull Requests](https://img.shields.io/github/issues-pr/muhammad-fiaz/Charisma?color=green)](https://github.com/muhammad-fiaz/Charisma/pulls)
 [![License](https://img.shields.io/github/license/muhammad-fiaz/Charisma?color=lightgrey)](https://github.com/muhammad-fiaz/Charisma/blob/main/LICENSE)
+<a href="https://colab.research.google.com/github/muhammad-fiaz/Charisma/blob/main/cookbook/charisma_colab.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
 
 </div>
 
@@ -50,7 +51,7 @@ See [NOTICE.md](NOTICE.md) for complete privacy details.
 
 ## 🚀 Installation & Setup
 
-### 1. Install Charisma
+### Option 1: Install Charisma Locally
 
 ```powershell
 # Clone the repository
@@ -62,7 +63,15 @@ uv sync
 
 # Or using pip
 pip install -e .
+uv run launch.py
 ```
+
+### Option 2: Run on Google Colab (No Installation Required)
+
+<a href="https://colab.research.google.com/github/muhammad-fiaz/Charisma/blob/main/cookbook/charisma_colab.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
+
+**🚀 Quick Start:** Click the badge above to open Charisma in Google Colab and start creating your AI clone immediately!
+
 
 ### 2. Create Notion Integration (Internal - API Key)
 
@@ -337,7 +346,7 @@ charisma/
 │       └── validators.py
 ├── outputs/                    # Trained models (created at runtime)
 ├── logs/                       # Application logs (created at runtime)
-├── charisma.toml              # Configuration file
+├── charisma.toml              # Configuration file (created at runtime)
 ├── pyproject.toml             # Project metadata
 ├── NOTICE.md                  # Privacy notice
 └── README.md                  # This file
