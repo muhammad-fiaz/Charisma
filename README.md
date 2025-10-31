@@ -29,6 +29,64 @@
 - ⚙️ **Fully Configurable** - All settings stored in `charisma.toml` and editable via UI
 - 📊 **Real-time Console** - Live training logs displayed directly in the UI
 
+## ⚠️ Important Notices
+
+### 📏 Model Size Matters
+
+> **Larger models produce better, more coherent responses!**
+
+- **Small models (270M - 1B parameters)**: May closely mimic your writing style from memories but can struggle with general conversation. Best for quick testing or limited hardware.
+- **Medium models (3B - 8B parameters)**: Good balance between performance and quality. Can handle both your memories and general conversation well.
+- **Large models (12B+ parameters)**: Excellent understanding, natural responses, and best personality representation. Recommended for production use.
+
+**Example Models:**
+```
+Small:  unsloth/gemma-3-270m-it (testing only)
+Medium: unsloth/gemma-3-4b-it (recommended for most users)
+Large:  unsloth/Llama-3.1-8B (best quality)
+Huge:   unsloth/Llama-3.3-70B (requires powerful GPU)
+```
+
+### 🎨 Full Customization Available
+
+**If your AI clone doesn't respond the way you expect:**
+
+1. **Adjust Training Parameters** in Settings tab:
+   - Learning rate (higher = faster learning, but less stable)
+   - Number of epochs (more = better learning, but risk overfitting)
+   - Max steps (increase for more training iterations)
+   - LoRA rank (higher = more capacity to learn)
+
+2. **Customize System Prompt** in Settings → Prompt Configuration:
+   - Define exactly how your AI should behave
+   - Use placeholders: `{name}`, `{age}`, `{gender}`, `{location}`, etc.
+   - Click "🔄 Refresh Config" to reload from `charisma.toml`
+
+3. **Adjust Inference Settings** in Inference tab:
+   - **Temperature** (1.0 recommended for Gemma-3): Higher = more creative
+   - **Top P** (0.95 recommended): Controls randomness
+   - **Top K** (64 recommended): Limits token choices
+   - **Max Tokens**: Control response length
+
+4. **Use Better Training Data**:
+   - Add more detailed, conversational memories to Notion
+   - Format as Q&A pairs for better results
+   - Use the "🔄 Refresh Memories" button to reload cached data
+
+5. **Edit `charisma.toml` Directly**:
+   - All settings are in one file for easy tweaking
+   - Use "🔄 Refresh Config" button to reload after manual edits
+   - No need to restart the application!
+
+### 🔍 Training Tips
+
+**For Best Results:**
+- Use at least 10-20 diverse memories for training
+- Include different topics and writing styles in your Notion pages
+- Larger batch sizes (if your GPU allows) = more stable training
+- Monitor training loss - it should decrease over time
+- Try different models - bigger isn't always better for your use case!
+
 ## 🔒 Privacy Notice
 
 **IMPORTANT:** Charisma is designed with privacy as the top priority:
