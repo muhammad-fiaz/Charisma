@@ -713,9 +713,10 @@ class NotionClient:
             return []
     
     def get_all_content(self) -> Dict[str, List[Dict]]:
-        """Get both pages and databases"""
+        """Get both pages and databases with full offline content"""
+        logger.info("📥 Downloading all Notion content offline (pages + databases)...")
         return {
-            "pages": self.get_all_pages(),
+            "pages": self.get_all_pages(include_content=True),  # Explicitly enable full content download
             "databases": self.get_all_databases()
         }
 

@@ -140,7 +140,7 @@ class CharismaApp:
                     self.config_manager.set("notion", "workspace_id", oauth_data.get("workspace_id", ""))
                     self.config_manager.set("notion", "bot_id", oauth_data.get("bot_id", ""))
                     self.config_manager.save_config()
-                    logger.info(f"💾 OAuth credentials saved to config")
+                    logger.info("💾 OAuth credentials saved to config")
                 
             elif api_key:
                 # Fallback to API key authentication
@@ -310,7 +310,7 @@ class CharismaApp:
             
             logger.success(f"✅ Loaded {len(cached_memories)} memories from cache")
 
-            # Get prompt configuration
+            # Get prompt configuration from config (Settings tab)
             system_prompt_template = self.config_manager.get("prompts", "system_prompt", "")
             response_structure = self.config_manager.get("prompts", "response_structure", "")
 
@@ -380,7 +380,7 @@ class CharismaApp:
                 "success": True,
                 "output_dir": output_dir,
                 "stats": {
-                    "total_memories": len(selected_memory_data),
+                    "total_memories": len(cached_memories),
                     "steps": stats.get("current_step", 0),
                     "final_loss": stats.get("loss", 0),
                 },
@@ -403,7 +403,6 @@ class CharismaApp:
     def load_model_for_inference(self, model_path: str) -> Dict:
         """Load a fine-tuned model for inference"""
         try:
-            import os
             from pathlib import Path
             
             model_path_obj = Path(model_path)
@@ -536,7 +535,6 @@ class CharismaApp:
         """Push model to Hugging Face Hub (generator for progress updates)"""
         try:
             from pathlib import Path
-            import os
             
             model_path_obj = Path(model_path)
             if not model_path_obj.exists():

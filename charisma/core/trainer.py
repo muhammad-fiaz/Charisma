@@ -1,7 +1,14 @@
 """Trainer for fine-tuning models"""
 
+import os
 import platform
 from typing import Dict, Optional, Callable
+
+# Force single process on Windows to avoid pickling issues with UnslothSFTTrainer
+# Windows multiprocessing uses 'spawn' instead of 'fork', which requires pickling
+# UnslothSFTTrainer can't be pickled, so we must use num_proc=1 on Windows
+if platform.system() == "Windows":
+    os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 try:
     from datasets import Dataset
@@ -58,8 +65,11 @@ class Trainer:
             report_to="none",  # Disable wandb/tensorboard
         )
 
-        # Set dataset_num_proc based on platform (Windows requires 1)
-        dataset_num_proc = training_config.get("dataset_num_proc", 1 if platform.system() == "Windows" else 2)
+        # Set dataset_num_proc based on platform (Windows MUST use 1 to avoid pickling issues)
+        if platform.system() == "Windows":
+            dataset_num_proc = 1
+        else:
+            dataset_num_proc = training_config.get("dataset_num_proc", 2)
 
         # Create trainer
         self.trainer = SFTTrainer(
@@ -118,8 +128,11 @@ class Trainer:
             report_to="none",
         )
 
-        # Set dataset_num_proc based on platform (Windows requires 1)
-        dataset_num_proc = training_config.get("dataset_num_proc", 1 if platform.system() == "Windows" else 2)
+        # Set dataset_num_proc based on platform (Windows MUST use 1 to avoid pickling issues)
+        if platform.system() == "Windows":
+            dataset_num_proc = 1
+        else:
+            dataset_num_proc = training_config.get("dataset_num_proc", 2)
 
         # Create trainer
         self.trainer = SFTTrainer(

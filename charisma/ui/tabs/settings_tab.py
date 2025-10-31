@@ -257,12 +257,110 @@ def create_settings_tab(
                     scale=1
                 )
 
+        # System Configuration Section
+        with gr.Group():
+            gr.Markdown("### 🖥️ System Configuration")
+
+            with gr.Row():
+                enable_debug_logs = gr.Checkbox(
+                    label="Enable Debug Logs",
+                    value=config_manager.get("system", "debug_logs", False),
+                    info="Show detailed debug information in logs",
+                    scale=1
+                )
+
+                num_gpus = gr.Number(
+                    label="Number of GPUs",
+                    value=max(1, config_manager.get("system", "num_gpus", 1) or 1),
+                    minimum=1,
+                    maximum=8,
+                    step=1,
+                    precision=0,
+                    info="Number of GPUs to use for training (1 for single GPU)",
+                    scale=1
+                )
+
+            with gr.Row():
+                gpu_ids = gr.Textbox(
+                    label="GPU IDs",
+                    value=config_manager.get("system", "gpu_ids", "0"),
+                    placeholder="0 or 0,1,2 for multi-GPU",
+                    info="Comma-separated GPU device IDs (e.g., '0' or '0,1,2')",
+                    scale=2
+                )
+
+        # Advanced Model Configuration Section
+        with gr.Group():
+            gr.Markdown("### 🧠 Advanced Model Configuration")
+
+            with gr.Row():
+                max_new_tokens = gr.Number(
+                    label="Max New Tokens",
+                    value=max(32, config_manager.get("model", "max_new_tokens", 256) or 256),
+                    minimum=32,
+                    maximum=2048,
+                    step=32,
+                    precision=0,
+                    info="Maximum tokens to generate during inference",
+                    scale=1
+                )
+
+                temperature = gr.Slider(
+                    label="Temperature",
+                    value=config_manager.get("model", "temperature", 0.7),
+                    minimum=0.1,
+                    maximum=2.0,
+                    step=0.1,
+                    info="Sampling temperature (lower = more focused, higher = more creative)",
+                    scale=1
+                )
+
+            with gr.Row():
+                top_p = gr.Slider(
+                    label="Top P (Nucleus Sampling)",
+                    value=config_manager.get("model", "top_p", 0.9),
+                    minimum=0.1,
+                    maximum=1.0,
+                    step=0.05,
+                    info="Cumulative probability for nucleus sampling",
+                    scale=1
+                )
+
+                top_k = gr.Number(
+                    label="Top K",
+                    value=max(0, config_manager.get("model", "top_k", 50) or 50),
+                    minimum=0,
+                    maximum=200,
+                    step=1,
+                    precision=0,
+                    info="Number of highest probability tokens to keep (0 = disabled)",
+                    scale=1
+                )
+
+            with gr.Row():
+                repetition_penalty = gr.Slider(
+                    label="Repetition Penalty",
+                    value=config_manager.get("model", "repetition_penalty", 1.1),
+                    minimum=1.0,
+                    maximum=2.0,
+                    step=0.05,
+                    info="Penalty for repeating tokens (1.0 = no penalty)",
+                    scale=1
+                )
+
+                use_cache = gr.Checkbox(
+                    label="Use KV Cache",
+                    value=config_manager.get("model", "use_cache", True),
+                    info="Use key-value cache for faster generation",
+                    scale=1
+                )
+
         # Prompt Configuration Section
         with gr.Group():
             gr.Markdown("### 💬 AI Clone Prompt Configuration", elem_classes="section-header")
             gr.Markdown(
                 "Configure how your AI clone should behave and respond. "
-                "Use `{name}`, `{age}`, `{location}`, `{country}`, `{hobbies}`, `{favorites}` as placeholders."
+                "Use `{name}`, `{age}`, `{location}`, `{country}`, `{hobbies}`, `{favorites}`, `{bio}` as placeholders."
             )
 
             system_prompt = gr.Textbox(
@@ -278,6 +376,9 @@ Your personality and characteristics:
 - Location: {location}, {country}
 - Interests: {hobbies}
 - Favorites: {favorites}
+
+About you:
+{bio}
 
 Based on the memories and experiences you've been trained on, you should:
 1. Respond in the same tone and style as {name}
@@ -357,6 +458,15 @@ Always stay in character and respond as {name} would respond."""
             grad_checkpoint,
             rslora,
             loftq,
+            debug_logs,
+            n_gpus,
+            gpus,
+            max_tokens,
+            temp,
+            nucleus_p,
+            topk,
+            rep_penalty,
+            kv_cache,
             sys_prompt,
             resp_structure,
             repo_name,
@@ -394,6 +504,15 @@ Always stay in character and respond as {name} would respond."""
                 "unsloth.use_gradient_checkpointing": bool(grad_checkpoint),
                 "unsloth.use_rslora": bool(rslora),
                 "unsloth.use_loftq": bool(loftq),
+                "system.debug_logs": bool(debug_logs),
+                "system.num_gpus": max(1, int(n_gpus)) if n_gpus else 1,
+                "system.gpu_ids": gpus.strip() if gpus else "0",
+                "model.max_new_tokens": max(32, int(max_tokens)) if max_tokens else 256,
+                "model.temperature": float(temp) if temp else 0.7,
+                "model.top_p": float(nucleus_p) if nucleus_p else 0.9,
+                "model.top_k": max(0, int(topk)) if topk else 50,
+                "model.repetition_penalty": float(rep_penalty) if rep_penalty else 1.1,
+                "model.use_cache": bool(kv_cache),
                 "prompts.system_prompt": sys_prompt if sys_prompt else "",
                 "prompts.response_structure": resp_structure if resp_structure else "",
                 "huggingface.default_repo": repo_name if repo_name else "my-charisma-model",
@@ -435,6 +554,15 @@ Always stay in character and respond as {name} would respond."""
                     use_gradient_checkpointing: config_manager.get("unsloth", "use_gradient_checkpointing", True),
                     use_rslora: config_manager.get("unsloth", "use_rslora", False),
                     use_loftq: config_manager.get("unsloth", "use_loftq", False),
+                    enable_debug_logs: config_manager.get("system", "debug_logs", False),
+                    num_gpus: max(1, config_manager.get("system", "num_gpus", 1) or 1),
+                    gpu_ids: config_manager.get("system", "gpu_ids", "0"),
+                    max_new_tokens: max(32, config_manager.get("model", "max_new_tokens", 256) or 256),
+                    temperature: config_manager.get("model", "temperature", 0.7),
+                    top_p: config_manager.get("model", "top_p", 0.9),
+                    top_k: max(0, config_manager.get("model", "top_k", 50) or 50),
+                    repetition_penalty: config_manager.get("model", "repetition_penalty", 1.1),
+                    use_cache: config_manager.get("model", "use_cache", True),
                     hf_repo: config_manager.get("huggingface", "default_repo", "my-charisma-model"),
                     hf_private: config_manager.get("huggingface", "private", True),
                 }
@@ -464,6 +592,15 @@ Always stay in character and respond as {name} would respond."""
                 use_gradient_checkpointing,
                 use_rslora,
                 use_loftq,
+                enable_debug_logs,
+                num_gpus,
+                gpu_ids,
+                max_new_tokens,
+                temperature,
+                top_p,
+                top_k,
+                repetition_penalty,
+                use_cache,
                 system_prompt,
                 response_structure,
                 hf_repo,
@@ -489,6 +626,15 @@ Always stay in character and respond as {name} would respond."""
                 use_gradient_checkpointing,
                 use_rslora,
                 use_loftq,
+                enable_debug_logs,
+                num_gpus,
+                gpu_ids,
+                max_new_tokens,
+                temperature,
+                top_p,
+                top_k,
+                repetition_penalty,
+                use_cache,
                 hf_repo,
                 hf_private,
             ],

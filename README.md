@@ -18,7 +18,7 @@
 
 ## ✨ Features
 
-- 🔗 **Notion Integration** - Browser-based OAuth or API key authentication to fetch all your notes
+- 🔗 **Notion Integration** - Browser-based API key authentication to fetch all your notes
 - 🎯 **Personalized Training** - Uses your personal details (name, age, location, hobbies, etc.) to create context
 - 🚀 **Powered by Unsloth** - 2x faster fine-tuning with 60% less memory usage
 - 💡 **LoRA & Full Fine-tuning** - Choose between fast LoRA fine-tuning or comprehensive full fine-tuning

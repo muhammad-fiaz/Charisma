@@ -1,7 +1,6 @@
 """Inference tab for testing fine-tuned models"""
 
-from typing import Callable, Optional
-import os
+from typing import Callable
 
 try:
     import gradio as gr
@@ -138,7 +137,7 @@ def create_inference_tab(
                 if result.get("success"):
                     status = f"**Status:** ✅ Model loaded successfully from `{model_path_input}`\n\n"
                     status += f"**Model Type:** {result.get('model_type', 'Unknown')}\n"
-                    status += f"**Ready for inference!**"
+                    status += "**Ready for inference!**"
                     return {
                         load_status: status,
                     }

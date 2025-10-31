@@ -168,7 +168,7 @@ class CacheManager:
         try:
             with open(self.index_file, 'r', encoding='utf-8') as f:
                 metadata = json.load(f)
-        except:
+        except (FileNotFoundError, json.JSONDecodeError, OSError):
             metadata = {}
         
         # Calculate cache size
@@ -176,7 +176,7 @@ class CacheManager:
         for filepath in index.values():
             try:
                 total_size += os.path.getsize(filepath)
-            except:
+            except (OSError, FileNotFoundError):
                 pass
         
         return {

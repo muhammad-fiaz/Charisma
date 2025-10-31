@@ -15,7 +15,9 @@ except ImportError as e:
 from charisma import __version__
 from charisma.ui import CharismaApp
 from charisma.utils.logger import setup_logger, get_logger
+from charisma.config import ConfigManager
 
+# Initialize logger (will be reconfigured after loading config)
 setup_logger()
 logger = get_logger()
 # Configure console for Windows compatibility - use ASCII characters only
@@ -88,6 +90,23 @@ Privacy Notice:
     if not config_path.exists():
         logger.warning(f"Config file not found: {args.config}")
         logger.info("A default config file will be created on first save in Settings tab")
+    
+    # Load config to check debug settings
+    try:
+        config_manager = ConfigManager(args.config)
+        debug_logs_enabled = config_manager.get("system", "debug_logs", False) or args.debug
+        
+        # Reconfigure logger with debug setting
+        global _configured
+        from charisma.utils import logger as logger_module
+        logger_module._configured = False
+        setup_logger(debug=debug_logs_enabled)
+        logger.info(f"Logging level: {'DEBUG' if debug_logs_enabled else 'INFO'}")
+    except Exception as e:
+        logger.warning(f"Could not load config for debug settings: {e}")
+        if args.debug:
+            logger_module._configured = False
+            setup_logger(debug=True)
 
     # Print banner with Rich
     console.print()

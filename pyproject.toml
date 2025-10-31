@@ -6,8 +6,8 @@ authors = [
     {name = "Muhammad Fiaz", email = "contact@muhammadfiaz.com"}
 ]
 readme = {file = "README.md",content-type = "text/markdown"}
-requires-python = ">=3.10"
-license = {text = "MIT"}
+requires-python = ">=3.10, <=3.13"
+license = {text = "AGPL"}
 keywords = ["ai", "llm", "memory", "fine-tuning", "unsloth", "notion", "gradio"]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -18,35 +18,49 @@ classifiers = [
     "Programming Language :: Python :: 3.13"
 ]
 dependencies = [
-  "torch>=2.5.0",
-  "torchvision>=0.20.0",
   "logly>=0.1.6",
-  "packaging>=24.0,<25.0",
   "requests>=2.32",
-  "tqdm>=4.67",
   "regex>=2024.11",
-  "sentencepiece>=0.2",
-  "safetensors>=0.5",
   "gradio>=5.12",
   "gradio-client>=1.5.4",
   "typer>=0.9.0",
   "toml>=0.10.2",
-  "notion-client>=2.2.1",
+  "notion-client>=2.2.1,<2.6.0",
   "rich>=14.2.0",
-  "datasets>=3.4.1",
+  "torch",
+  "torchvision",
+  "torchaudio",
+  "wheel>=0.42.0",
+  "packaging",
+  "numpy",
+  "tqdm",
+  "psutil",
+  "tyro",
+  "protobuf",
+  "sentencepiece>=0.2.0",
+  "datasets>=3.4.1,!=4.0.*,!=4.1.0",
   "accelerate>=0.34.1",
-  "peft>=0.7.1",
-  "transformers>=4.51.3,<4.58.0",
-  "trl>=0.18.2,<0.24.0",
-  "bitsandbytes>=0.45.5",
-  "xformers>=0.0.28",
-  "unsloth>=2025.10.12",
-  "triton-windows>=3.5.0.post21",
+  "peft>=0.7.1,!=0.11.0",
+  "huggingface_hub>=0.34.0",
+  "hf_transfer",
+  "diffusers",
+  "transformers>=4.51.3,!=4.52.0,!=4.52.1,!=4.52.2,!=4.52.3,!=4.53.0,!=4.54.0,!=4.55.0,!=4.55.1,!=4.57.0,<=4.57.2",
+  "trl>=0.18.2,!=0.19.0,<=0.23.0",
+  "unsloth_zoo>=2025.10.13",
+  # Triton for Windows and Linux
+  "triton>=3.0.0 ; 'linux' in sys_platform",
+  "triton-windows>=3.5.0 ; sys_platform == 'win32' and (platform_machine == 'AMD64' or platform_machine == 'x86_64')",
+  "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0 ; sys_platform == 'win32'",
+  "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0 ; 'linux' in sys_platform",
+    "xformers>=0.0.28,<0.0.33 ; sys_platform == 'win32'",
+  "xformers ; 'linux' in sys_platform",
+    "unsloth @ git+https://github.com/unslothai/unsloth.git",
 ]
 
 [build-system]
-requires = ["setuptools>=65.0", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["uv_build>=0.9.6,<0.10.0"]
+build-backend = "uv_build"
+
 
 [tool.setuptools]
 packages = ["charisma"]
@@ -55,45 +69,46 @@ packages = ["charisma"]
 charisma = ["py.typed"]
 
 [project.urls]
-source = "https://github.com/muhammad-fiaz/finetune-web-ui.git"
-homepage = "https://github.com/muhammad-fiaz/finetune-web-ui#readme"
-documentation = "https://github.com/muhammad-fiaz/finetune-web-ui#readme"
-repository = "https://github.com/muhammad-fiaz/finetune-web-ui"
-
-[tool.uv.sources]
-torch = [
-  { index = "pytorch-cu129", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-]
-torchvision = [
-  { index = "pytorch-cu129", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-]
-
-
-[[tool.uv.index]]
-name = "pytorch-cu129"
-url = "https://download.pytorch.org/whl/cu129"
-explicit = true
+source = "https://github.com/muhammad-fiaz/charisma.git"
+homepage = "https://github.com/muhammad-fiaz/charisma#readme"
+documentation = "https://github.com/muhammad-fiaz/charisma#readme"
+repository = "https://github.com/muhammad-fiaz/charisma"
 
 
 [project.optional-dependencies]
 dev = [
     "jupyter>=1.1.1",
     "ipykernel>=6.29.5",
+    "black>=24.9.1",
+    "ruff>=0.0.306",
 ]
-
-[tool.uv.pip]
-extra = ["dev"]
-python = "3.12"
-output-file = "requirements.txt"
-
-
-[tool.uv]
-package = true
-
 [project.scripts]
 charisma = "charisma.main:main"
 
+[tool.uv.pip]
+output-file = "requirements.txt"
 
+[tool.uv.extra-build-dependencies]
+xformers = ["torch", "ninja"]
+
+[[tool.uv.index]]
+name = "pytorch-cu129"
+url = "https://download.pytorch.org/whl/cu129"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu129" }
+torchvision = { index = "pytorch-cu129" }
+torchaudio = { index = "pytorch-cu129" }
+xformers = { index = "pytorch-cu129" }
+
+[tool.uv]
+package = true
+managed = true
+
+[tool.uv.build-backend]
+module-name = "charisma"
+module-root = ""
 
 [tool.black]
 line-length = 100

@@ -70,8 +70,13 @@ def _create_rich_callback():
     return rich_color_callback
 
 
-def setup_logger(log_file: Optional[str] = None) -> None:
-    """Setup Logly logger with Rich integration and file output"""
+def setup_logger(log_file: Optional[str] = None, debug: bool = False) -> None:
+    """Setup Logly logger with Rich integration and file output
+    
+    Args:
+        log_file: Optional custom log file path
+        debug: Enable debug-level logging (default: False, INFO only)
+    """
     global _configured
     
     if _configured:
@@ -90,9 +95,12 @@ def setup_logger(log_file: Optional[str] = None) -> None:
     # Create Rich color callback if available
     color_callback = _create_rich_callback()
     
+    # Set log level based on debug flag
+    log_level = "DEBUG" if debug else "INFO"
+    
     # Configure Logly with Rich integration
     config = {
-        "level": "DEBUG",
+        "level": log_level,
         "color": True,
         "auto_sink": True,  # Console output with Rich colors
         "auto_sink_levels": {

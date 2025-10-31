@@ -33,7 +33,8 @@ def create_main_tab(
 
         # Personal Information Section
         with gr.Group():
-            gr.Markdown("### Personal Information")
+            gr.Markdown("### 👤 Personal Information")
+            gr.Markdown("Fill in your personal details to create a personalized AI clone")
             
             with gr.Row():
                 name_input = gr.Textbox(
@@ -59,7 +60,7 @@ def create_main_tab(
                     scale=1
                 )
                 location_input = gr.Textbox(
-                    label="Location", 
+                    label="Location/City", 
                     placeholder="New York",
                     value="New York",
                     scale=1
@@ -67,7 +68,7 @@ def create_main_tab(
 
             with gr.Row():
                 hobbies_input = gr.Textbox(
-                    label="Hobbies",
+                    label="Hobbies/Interests",
                     placeholder="Reading, Coding, Photography",
                     value="Reading, Coding, Photography",
                     scale=1,
@@ -78,6 +79,14 @@ def create_main_tab(
                     value="Pizza, Sci-fi movies, Python",
                     scale=1,
                 )
+
+            bio_input = gr.Textbox(
+                label="About Yourself",
+                placeholder="Tell us about yourself... your personality, background, goals, or anything that makes you unique",
+                value="",
+                lines=4,
+                info="This helps your AI clone understand your personality and context better"
+            )
 
         # Notion Connection Section
         with gr.Group():
@@ -280,6 +289,7 @@ def create_main_tab(
             location,
             hobbies,
             favorites,
+            bio,
             selected_memories,
             selected_model,
             custom_model,
@@ -301,6 +311,7 @@ def create_main_tab(
                 "location": location,
                 "hobbies": hobbies,
                 "favorites": favorites,
+                "bio": bio,
             }
 
             model_to_use = (
@@ -364,6 +375,7 @@ Please check the Logs tab for more details.
                 location_input,
                 hobbies_input,
                 favorites_input,
+                bio_input,
                 memories_selector,
                 model_dropdown,
                 custom_model_input,

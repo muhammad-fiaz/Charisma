@@ -1,5 +1,6 @@
 """Data processor for preparing training data from Notion memories"""
 
+import platform
 from datetime import datetime
 from typing import Dict, List, Optional
 
@@ -78,6 +79,7 @@ class DataProcessor:
                     "location": personal_info.get("location", ""),
                     "hobbies": personal_info.get("hobbies", ""),
                     "favorites": personal_info.get("favorites", ""),
+                    "bio": personal_info.get("bio", ""),
                 }
                 
                 # Add any additional fields from personal_info
@@ -110,8 +112,10 @@ class DataProcessor:
             prompt_parts.append(f"Hobbies: {personal_info['hobbies']}")
         if "favorites" in personal_info and personal_info["favorites"]:
             prompt_parts.append(f"Favorites: {personal_info['favorites']}")
+        if "bio" in personal_info and personal_info["bio"]:
+            prompt_parts.append(f"\nAbout:\n{personal_info['bio']}")
 
-        excluded = {"name", "age", "country", "location", "hobbies", "favorites"}
+        excluded = {"name", "age", "country", "location", "hobbies", "favorites", "bio", "system_prompt_template"}
         for key, value in personal_info.items():
             if key not in excluded and value:
                 prompt_parts.append(f"{key.capitalize()}: {value}")
@@ -168,6 +172,8 @@ class DataProcessor:
             ]
             return {"text": texts}
 
-        dataset = dataset.map(formatting_func, batched=True)
+        # Windows requires num_proc=1 to avoid pickling issues
+        num_proc = 1 if platform.system() == "Windows" else None
+        dataset = dataset.map(formatting_func, batched=True, num_proc=num_proc)
         logger.info("Applied chat template to dataset")
         return dataset
