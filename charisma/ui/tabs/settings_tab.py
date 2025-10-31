@@ -20,11 +20,14 @@ def create_settings_tab(
     on_save_config: Callable,
     on_test_notion: Callable,
     on_test_hf: Callable,
+    on_refresh_config: Callable = None,
 ) -> gr.Column:
     """Create the settings tab"""
 
     with gr.Column() as settings_tab:
-        gr.Markdown("# ⚙️ Settings")
+        with gr.Row():
+            gr.Markdown("# ⚙️ Settings")
+            refresh_config_btn = gr.Button("🔄 Refresh Config", variant="secondary", scale=0)
         gr.Markdown("Configure Charisma settings. Changes are saved to `charisma.toml`")
 
         # API Keys Section
@@ -637,5 +640,90 @@ def create_settings_tab(
             inputs=hf_token,
             outputs=hf_test_result,
         )
+        
+        # Refresh Config Button
+        def handle_refresh_config():
+            """Reload config from file and update all fields"""
+            config_manager.load_config()
+            logger.info("Configuration reloaded from charisma.toml")
+            
+            return {
+                notion_token: config_manager.get("notion", "api_key", ""),
+                hf_token: config_manager.get("huggingface", "token", ""),
+                batch_size: max(1, config_manager.get("training", "batch_size", 2) or 2),
+                gradient_accum: max(1, config_manager.get("training", "gradient_accumulation_steps", 4) or 4),
+                learning_rate: max(1e-6, config_manager.get("training", "learning_rate", 2e-4) or 2e-4),
+                num_epochs: max(1, config_manager.get("training", "num_epochs", 1) or 1),
+                max_steps: max(1, config_manager.get("training", "max_steps", 60) or 60),
+                warmup_steps: max(0, config_manager.get("training", "warmup_steps", 5) or 5),
+                optimizer: config_manager.get("training", "optimizer", "adamw_8bit"),
+                lr_scheduler: config_manager.get("training", "lr_scheduler_type", "linear"),
+                lora_r: max(1, config_manager.get("lora", "r", 16) or 16),
+                lora_alpha: max(1, config_manager.get("lora", "lora_alpha", 16) or 16),
+                lora_dropout: config_manager.get("lora", "lora_dropout", 0),
+                max_seq_length: max(128, config_manager.get("model", "max_seq_length", 2048) or 2048),
+                load_in_4bit: config_manager.get("model", "load_in_4bit", True),
+                dataset_num_proc: max(1, config_manager.get("unsloth", "dataset_num_proc", 1) or 1),
+                packing: config_manager.get("unsloth", "packing", False),
+                use_gradient_checkpointing: config_manager.get("unsloth", "use_gradient_checkpointing", True),
+                use_rslora: config_manager.get("unsloth", "use_rslora", False),
+                use_loftq: config_manager.get("unsloth", "use_loftq", False),
+                enable_debug_logs: config_manager.get("system", "debug_logs", False),
+                num_gpus: max(1, config_manager.get("system", "num_gpus", 1) or 1),
+                gpu_ids: config_manager.get("system", "gpu_ids", "0"),
+                max_new_tokens: max(32, config_manager.get("model", "max_new_tokens", 256) or 256),
+                temperature: config_manager.get("model", "temperature", 0.7),
+                top_p: config_manager.get("model", "top_p", 0.9),
+                top_k: max(0, config_manager.get("model", "top_k", 50) or 50),
+                repetition_penalty: config_manager.get("model", "repetition_penalty", 1.1),
+                use_cache: config_manager.get("model", "use_cache", True),
+                system_prompt: config_manager.get("prompts", "system_prompt", ""),
+                response_structure: config_manager.get("prompts", "response_structure", ""),
+                hf_repo: config_manager.get("huggingface", "default_repo", "my-charisma-model"),
+                hf_private: config_manager.get("huggingface", "private", True),
+                save_result: "✅ Configuration refreshed from charisma.toml",
+            }
+        
+        refresh_config_btn.click(
+            fn=handle_refresh_config,
+            inputs=[],
+            outputs=[
+                notion_token,
+                hf_token,
+                batch_size,
+                gradient_accum,
+                learning_rate,
+                num_epochs,
+                max_steps,
+                warmup_steps,
+                optimizer,
+                lr_scheduler,
+                lora_r,
+                lora_alpha,
+                lora_dropout,
+                max_seq_length,
+                load_in_4bit,
+                dataset_num_proc,
+                packing,
+                use_gradient_checkpointing,
+                use_rslora,
+                use_loftq,
+                enable_debug_logs,
+                num_gpus,
+                gpu_ids,
+                max_new_tokens,
+                temperature,
+                top_p,
+                top_k,
+                repetition_penalty,
+                use_cache,
+                system_prompt,
+                response_structure,
+                hf_repo,
+                hf_private,
+                save_result,
+            ],
+        )
+
 
     return settings_tab

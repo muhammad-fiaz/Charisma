@@ -85,6 +85,19 @@ class Trainer:
             args=args,
             dataset_num_proc=1,  # Force single process for dataset operations on all platforms
         )
+        
+        # Use Unsloth's train_on_responses_only to mask instruction parts
+        # This improves accuracy by only training on the assistant's responses
+        try:
+            from unsloth.chat_templates import train_on_responses_only
+            self.trainer = train_on_responses_only(
+                self.trainer,
+                instruction_part="<start_of_turn>user\n",
+                response_part="<start_of_turn>model\n",
+            )
+            logger.info("✅ Enabled train_on_responses_only - will only train on assistant outputs")
+        except Exception as e:
+            logger.warning(f"Could not enable train_on_responses_only: {e}. Continuing without masking.")
 
         # Train
         logger.info("Training started...")
@@ -150,6 +163,19 @@ class Trainer:
             args=args,
             dataset_num_proc=1,  # Force single process for dataset operations on all platforms
         )
+        
+        # Use Unsloth's train_on_responses_only to mask instruction parts
+        # This improves accuracy by only training on the assistant's responses
+        try:
+            from unsloth.chat_templates import train_on_responses_only
+            self.trainer = train_on_responses_only(
+                self.trainer,
+                instruction_part="<start_of_turn>user\n",
+                response_part="<start_of_turn>model\n",
+            )
+            logger.info("✅ Enabled train_on_responses_only - will only train on assistant outputs")
+        except Exception as e:
+            logger.warning(f"Could not enable train_on_responses_only: {e}. Continuing without masking.")
 
         # Train
         logger.info("Full fine-tuning started...")

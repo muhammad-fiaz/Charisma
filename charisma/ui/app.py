@@ -45,6 +45,7 @@ class CharismaApp:
         self.inference_stopped = False  # Flag to stop inference
         self.training_active = False  # Flag to track if training is running
         self.inference_active = False  # Flag to track if inference is running
+        self.last_personal_info = {}  # Store personal info from last training
 
         logger.info("Charisma application initialized")
         
@@ -271,6 +272,10 @@ class CharismaApp:
         try:
             logger.info("Starting AI clone generation")
             self.training_active = True  # Mark training as active
+            
+            # Store personal info for inference
+            self.last_personal_info = personal_info.copy()
+            
             logger.info("Personal info: %s", personal_info)
             logger.info("Model: %s", model_name)
             logger.info(
@@ -418,8 +423,9 @@ class CharismaApp:
             if not self.model_manager:
                 self.model_manager = ModelManager()
             
-            # Load the model and tokenizer
+            # Load the model and tokenizer using Unsloth for proper inference
             from transformers import AutoModelForCausalLM, AutoTokenizer
+            from unsloth import FastLanguageModel
             import torch
             
             self.inference_tokenizer = AutoTokenizer.from_pretrained(model_path)
@@ -428,6 +434,9 @@ class CharismaApp:
                 device_map="auto",
                 torch_dtype=torch.float16,
             )
+            
+            # Enable Unsloth inference optimizations
+            FastLanguageModel.for_inference(self.inference_model)
             
             logger.success(f"✅ Model loaded successfully from {model_path}")
             
@@ -446,11 +455,13 @@ class CharismaApp:
         message: str,
         temperature: float = 0.7,
         top_p: float = 0.9,
+        top_k: int = 50,
         max_new_tokens: int = 256,
         repetition_penalty: float = 1.1,
-        system_prompt: str = None
+        system_prompt: str = None,
+        personal_info: Dict = None
     ) -> Dict:
-        """Run inference on the loaded model - RAW inference without system prompt"""
+        """Run inference on the loaded model with proper persona formatting"""
         try:
             if not self.inference_model or not self.inference_tokenizer:
                 return {
@@ -459,16 +470,46 @@ class CharismaApp:
                 }
             
             self.inference_active = True  # Mark inference as active
-            
             self.inference_stopped = False
             
-            # RAW INFERENCE - Model personality is already baked in from training
-            # Only use user message, NO system prompt (unless explicitly overridden for testing)
+            # Build messages with system prompt for persona
             messages = []
             
-            # Only add system prompt if user explicitly provides one (for advanced testing)
+            # Use provided system prompt or get from config
+            if not system_prompt:
+                # Get system prompt from config and format with personal info
+                config_system_prompt = self.config_manager.get("prompts", "system_prompt", "")
+                if config_system_prompt and personal_info:
+                    try:
+                        # Format the system prompt with personal info
+                        format_dict = {
+                            "name": personal_info.get("name", "the user"),
+                            "age": personal_info.get("age", ""),
+                            "gender": personal_info.get("gender", ""),
+                            "country": personal_info.get("country", ""),
+                            "location": personal_info.get("location", ""),
+                            "hobbies": personal_info.get("hobbies", ""),
+                            "favorites": personal_info.get("favorites", ""),
+                            "bio": personal_info.get("bio", ""),
+                        }
+                        system_prompt = config_system_prompt.format(**format_dict)
+                        
+                        # Add response structure if available
+                        response_structure = self.config_manager.get("prompts", "response_structure", "")
+                        if response_structure:
+                            system_prompt += f"\n\n{response_structure}"
+                            
+                    except KeyError as e:
+                        logger.warning(f"Could not format system prompt: {e}. Using raw prompt.")
+                        system_prompt = config_system_prompt
+                elif config_system_prompt:
+                    system_prompt = config_system_prompt
+                else:
+                    # Fallback system prompt if nothing is configured
+                    system_prompt = "You are a helpful AI assistant. Respond naturally and conversationally."
+            
+            # Add system prompt if we have one
             if system_prompt and system_prompt.strip():
-                logger.info("Using custom system prompt override")
                 messages.append({"role": "system", "content": system_prompt})
             
             # Add user message
@@ -494,19 +535,54 @@ class CharismaApp:
                 outputs = self.inference_model.generate(
                     **inputs,
                     max_new_tokens=max_new_tokens,
-                    temperature=temperature,
-                    top_p=top_p,
-                    repetition_penalty=repetition_penalty,
-                    do_sample=True,
+                    temperature=1.0 if temperature <= 0.1 else temperature,  # Gemma-3 recommended: 1.0
+                    top_p=0.95 if not top_p else top_p,  # Gemma-3 recommended: 0.95
+                    top_k=64 if not top_k else top_k,  # Gemma-3 recommended: 64
+                    repetition_penalty=repetition_penalty if repetition_penalty else 1.0,
+                    do_sample=True,  # Always sample for natural responses
                     pad_token_id=self.inference_tokenizer.eos_token_id,
+                    eos_token_id=self.inference_tokenizer.eos_token_id,
+                    use_cache=True,
                 )
             
             # Decode response
-            response = self.inference_tokenizer.decode(
-                outputs[0][inputs['input_ids'].shape[1]:],
-                skip_special_tokens=True
+            full_response = self.inference_tokenizer.decode(
+                outputs[0],
+                skip_special_tokens=False
             )
-            
+
+            # Extract only the assistant's response from the chat template
+            # For Gemma models, we need to find the assistant's response after the generation prompt
+            response = full_response
+
+            # Try to extract assistant response more precisely
+            if "<start_of_turn>model" in full_response:
+                # Gemma chat template format
+                parts = full_response.split("<start_of_turn>model")
+                if len(parts) > 1:
+                    response = parts[-1].split("<end_of_turn>")[0].strip()
+            elif "<|assistant|>" in full_response:
+                # Llama-style chat template
+                parts = full_response.split("<|assistant|>")
+                if len(parts) > 1:
+                    response = parts[-1].split("<|end|>")[-1].split("<|eot_id|>")[0].strip()
+            elif "Assistant:" in full_response:
+                # Simple format
+                parts = full_response.split("Assistant:")
+                if len(parts) > 1:
+                    response = parts[-1].strip()
+            else:
+                # Fallback: remove the input from the response
+                input_text = self.inference_tokenizer.decode(
+                    inputs['input_ids'][0],
+                    skip_special_tokens=False
+                )
+                if full_response.startswith(input_text):
+                    response = full_response[len(input_text):].strip()
+
+            # Clean up any remaining special tokens
+            response = response.replace("<end_of_turn>", "").replace("<|end|>", "").replace("<|eot_id|>", "").strip()
+
             logger.info(f"Generated response: {response[:100]}...")
             
             self.inference_active = False  # Mark inference as inactive
@@ -830,9 +906,10 @@ This model was fine-tuned using personal memories to create an AI clone that mim
                 with gr.Tab("Inference"):
                     create_inference_tab(
                         on_load_model=self.load_model_for_inference,
-                        on_inference=self.run_inference,
+                        on_inference=lambda **kwargs: self.run_inference(**kwargs),
                         on_stop_inference=self.stop_inference,
                         inference_active=self.inference_active,
+                        get_personal_info=lambda: self.last_personal_info,
                     )
 
                 with gr.Tab("Push to Hub"):

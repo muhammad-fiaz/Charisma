@@ -20,6 +20,7 @@ def create_inference_tab(
     on_inference: Callable,
     on_stop_inference: Callable,
     inference_active: bool = False,
+    get_personal_info: Callable = None,
 ) -> gr.Column:
     """Create the inference tab for testing fine-tuned models"""
 
@@ -71,9 +72,9 @@ def create_inference_tab(
                     label="Temperature",
                     minimum=0.1,
                     maximum=2.0,
-                    value=0.7,
+                    value=1.0,  # Gemma-3 recommended default
                     step=0.1,
-                    info="Higher = more creative, Lower = more focused",
+                    info="Higher = more creative, Lower = more focused (Gemma-3 default: 1.0)",
                     scale=1
                 )
                 
@@ -81,9 +82,30 @@ def create_inference_tab(
                     label="Top P (Nucleus Sampling)",
                     minimum=0.1,
                     maximum=1.0,
-                    value=0.9,
+                    value=0.95,  # Gemma-3 recommended default
                     step=0.05,
-                    info="Probability threshold for token selection",
+                    info="Probability threshold for token selection (Gemma-3 default: 0.95)",
+                    scale=1
+                )
+            
+            with gr.Row():
+                top_k = gr.Slider(
+                    label="Top K",
+                    minimum=0,
+                    maximum=200,
+                    value=64,  # Gemma-3 recommended default
+                    step=1,
+                    info="Number of top tokens to consider (Gemma-3 default: 64, 0=disabled)",
+                    scale=1
+                )
+                
+                repetition_penalty = gr.Slider(
+                    label="Repetition Penalty",
+                    minimum=1.0,
+                    maximum=2.0,
+                    value=1.1,
+                    step=0.05,
+                    info="Penalty for repeating tokens",
                     scale=1
                 )
             
@@ -95,16 +117,6 @@ def create_inference_tab(
                     value=256,
                     step=32,
                     info="Maximum length of generated response",
-                    scale=1
-                )
-                
-                repetition_penalty = gr.Slider(
-                    label="Repetition Penalty",
-                    minimum=1.0,
-                    maximum=2.0,
-                    value=1.1,
-                    step=0.05,
-                    info="Penalty for repeating tokens",
                     scale=1
                 )
 
@@ -174,9 +186,10 @@ def create_inference_tab(
             message, 
             history, 
             temp, 
-            top_p_val, 
-            max_tokens, 
+            top_p_val,
+            top_k_val,
             rep_penalty,
+            max_tokens,
             sys_prompt_override
         ):
             """Generate response from the AI clone"""
@@ -188,14 +201,19 @@ def create_inference_tab(
             history.append({"role": "user", "content": message})
             
             try:
+                # Get personal info for system prompt
+                personal_info = get_personal_info() if get_personal_info else None
+                
                 # Call inference function
                 result = on_inference(
                     message=message,
                     temperature=temp,
                     top_p=top_p_val,
+                    top_k=int(top_k_val),
                     max_new_tokens=int(max_tokens),
                     repetition_penalty=rep_penalty,
-                    system_prompt=sys_prompt_override if sys_prompt_override else None
+                    system_prompt=sys_prompt_override if sys_prompt_override else None,
+                    personal_info=personal_info
                 )
                 
                 if result.get("success"):
@@ -228,9 +246,10 @@ def create_inference_tab(
                 user_input, 
                 chatbot, 
                 temperature, 
-                top_p, 
-                max_new_tokens, 
+                top_p,
+                top_k,
                 repetition_penalty,
+                max_new_tokens,
                 system_prompt_override
             ],
             outputs=[chatbot, user_input]
@@ -242,9 +261,10 @@ def create_inference_tab(
                 user_input, 
                 chatbot, 
                 temperature, 
-                top_p, 
-                max_new_tokens, 
+                top_p,
+                top_k,
                 repetition_penalty,
+                max_new_tokens,
                 system_prompt_override
             ],
             outputs=[chatbot, user_input]
