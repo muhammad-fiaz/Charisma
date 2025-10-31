@@ -450,7 +450,7 @@ class CharismaApp:
         repetition_penalty: float = 1.1,
         system_prompt: str = None
     ) -> Dict:
-        """Run inference on the loaded model"""
+        """Run inference on the loaded model - RAW inference without system prompt"""
         try:
             if not self.inference_model or not self.inference_tokenizer:
                 return {
@@ -462,10 +462,16 @@ class CharismaApp:
             
             self.inference_stopped = False
             
-            # Build conversation
+            # RAW INFERENCE - Model personality is already baked in from training
+            # Only use user message, NO system prompt (unless explicitly overridden for testing)
             messages = []
-            if system_prompt:
+            
+            # Only add system prompt if user explicitly provides one (for advanced testing)
+            if system_prompt and system_prompt.strip():
+                logger.info("Using custom system prompt override")
                 messages.append({"role": "system", "content": system_prompt})
+            
+            # Add user message
             messages.append({"role": "user", "content": message})
             
             # Apply chat template

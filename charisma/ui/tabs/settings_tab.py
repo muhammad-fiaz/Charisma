@@ -360,54 +360,22 @@ def create_settings_tab(
             gr.Markdown("### 💬 AI Clone Prompt Configuration", elem_classes="section-header")
             gr.Markdown(
                 "Configure how your AI clone should behave and respond. "
-                "Use `{name}`, `{age}`, `{location}`, `{country}`, `{hobbies}`, `{favorites}`, `{bio}` as placeholders."
+                "Use `{name}`, `{age}`, `{gender}`, `{location}`, `{country}`, `{hobbies}`, `{favorites}`, `{bio}` as placeholders."
             )
 
             system_prompt = gr.Textbox(
                 label="System Prompt Template",
-                value=config_manager.get(
-                    "prompts", 
-                    "system_prompt", 
-                    """You are an AI clone trained to act, think, and respond exactly like {name}.
-
-Your personality and characteristics:
-- Name: {name}
-- Age: {age}
-- Location: {location}, {country}
-- Interests: {hobbies}
-- Favorites: {favorites}
-
-About you:
-{bio}
-
-Based on the memories and experiences you've been trained on, you should:
-1. Respond in the same tone and style as {name}
-2. Use similar vocabulary and expressions
-3. Reference memories and past experiences naturally
-4. Maintain consistent personality traits
-5. Show the same interests and preferences
-
-Always stay in character and respond as {name} would respond."""
-                ),
+                value=config_manager.get("prompts", "system_prompt", ""),
                 placeholder="Enter your custom system prompt template...",
-                lines=10,
+                lines=15,
                 info="This template defines the AI clone's personality and behavior"
             )
 
             response_structure = gr.Textbox(
                 label="Response Structure Guidelines",
-                value=config_manager.get(
-                    "prompts",
-                    "response_structure",
-                    """When responding:
-1. Be natural and conversational
-2. Draw from relevant memories when appropriate
-3. Stay true to the personality and characteristics
-4. Keep responses authentic and personal
-5. Use first-person perspective (I, me, my)"""
-                ),
+                value=config_manager.get("prompts", "response_structure", ""),
                 placeholder="Enter response structure guidelines...",
-                lines=6,
+                lines=3,
                 info="Guidelines for how the AI clone should structure its responses"
             )
 

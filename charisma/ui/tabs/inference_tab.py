@@ -19,13 +19,25 @@ def create_inference_tab(
     on_load_model: Callable,
     on_inference: Callable,
     on_stop_inference: Callable,
-    inference_active: bool = False,  # New parameter
+    inference_active: bool = False,
 ) -> gr.Column:
     """Create the inference tab for testing fine-tuned models"""
 
     with gr.Column() as inference_tab:
         gr.Markdown("# 🤖 Test Your AI Clone")
-        gr.Markdown("Load and test your fine-tuned AI clone models")
+        gr.Markdown(
+            """
+            Your AI clone has been trained to embody your personality, memories, and way of speaking.
+            
+            **What to expect:**
+            - ✅ The model responds as YOU - in first person (I, me, my)
+            - ✅ References YOUR memories naturally
+            - ✅ Uses YOUR personality and speech patterns
+            - ✅ No system prompts needed - personality is embedded in the model
+            
+            **Try saying:** "Hi!", "What's up?", "Tell me about yourself", "What did you do recently?"
+            """
+        )
 
         # Model Selection Section
         with gr.Group():
@@ -120,13 +132,20 @@ def create_inference_tab(
             stop_btn = gr.Button("Stop", variant="stop", size="lg", interactive=inference_active)
             clear_btn = gr.Button("Clear Chat", size="lg")
 
-        # System Prompt Override (Optional)
-        with gr.Accordion("Advanced: Override System Prompt", open=False):
+        # System Prompt Override (Optional - Advanced Testing Only)
+        with gr.Accordion("⚠️ Advanced: System Prompt Override (Optional)", open=False):
+            gr.Markdown(
+                """
+                **Note:** Your AI clone's personality is already embedded in the model from training.
+                
+                Leave this empty for normal testing. Only use this field if you want to experiment with different system prompts for testing purposes.
+                """
+            )
             system_prompt_override = gr.Textbox(
-                label="Custom System Prompt",
-                placeholder="Leave empty to use the default system prompt from training...",
+                label="Custom System Prompt (Leave Empty for Raw Model Inference)",
+                placeholder="",
                 lines=5,
-                info="Override the system prompt for this conversation (optional)"
+                info="⚠️ Advanced users only - Leave empty to test the model's natural personality"
             )
 
         # Event Handlers

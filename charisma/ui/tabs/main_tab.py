@@ -51,6 +51,13 @@ def create_main_tab(
                     precision=0, 
                     value=25
                 )
+                gender_input = gr.Dropdown(
+                    label="Gender",
+                    choices=["Male", "Female", "Other", "Prefer not to say"],
+                    value="Male",
+                    scale=1,
+                    info="Helps personalize your AI clone"
+                )
 
             with gr.Row():
                 country_input = gr.Textbox(
@@ -83,7 +90,7 @@ def create_main_tab(
             bio_input = gr.Textbox(
                 label="About Yourself",
                 placeholder="Tell us about yourself... your personality, background, goals, or anything that makes you unique",
-                value="",
+                value="Cool Developer",
                 lines=4,
                 info="This helps your AI clone understand your personality and context better"
             )
@@ -285,6 +292,7 @@ def create_main_tab(
         def handle_generate(
             name,
             age,
+            gender,
             country,
             location,
             hobbies,
@@ -307,6 +315,7 @@ def create_main_tab(
             personal_info = {
                 "name": name,
                 "age": str(int(age)) if age else "",
+                "gender": gender,
                 "country": country,
                 "location": location,
                 "hobbies": hobbies,
@@ -371,6 +380,7 @@ Please check the Logs tab for more details.
             inputs=[
                 name_input,
                 age_input,
+                gender_input,
                 country_input,
                 location_input,
                 hobbies_input,

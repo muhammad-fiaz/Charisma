@@ -63,25 +63,27 @@ class Trainer:
             seed=3407,
             output_dir=output_dir,
             report_to="none",  # Disable wandb/tensorboard
+            dataloader_num_workers=0 if platform.system() == "Windows" else 2,  # Force single-thread on Windows
         )
 
-        # Set dataset_num_proc based on platform (Windows MUST use 1 to avoid pickling issues)
+        # Ensure single-process mode on Windows
         if platform.system() == "Windows":
-            dataset_num_proc = 1
-        else:
-            dataset_num_proc = training_config.get("dataset_num_proc", 2)
+            # Force environment variable to ensure single-process mode
+            import os
+            os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
-        # Create trainer
+        # Create trainer with dataset_text_field to use pre-formatted text
+        # This prevents SFTTrainer from doing its own multiprocess tokenization
         self.trainer = SFTTrainer(
             model=self.model,
             tokenizer=self.tokenizer,
             train_dataset=dataset,
-            dataset_text_field="text",
+            dataset_text_field="text",  # Use the pre-formatted "text" field directly
             max_seq_length=training_config.get("max_seq_length", 2048),
             data_collator=DataCollatorForSeq2Seq(tokenizer=self.tokenizer),
-            dataset_num_proc=dataset_num_proc,
             packing=training_config.get("packing", False),
             args=args,
+            dataset_num_proc=1,  # Force single process for dataset operations on all platforms
         )
 
         # Train
@@ -126,25 +128,27 @@ class Trainer:
             seed=3407,
             output_dir=output_dir,
             report_to="none",
+            dataloader_num_workers=0 if platform.system() == "Windows" else 2,  # Force single-thread on Windows
         )
 
-        # Set dataset_num_proc based on platform (Windows MUST use 1 to avoid pickling issues)
+        # Ensure single-process mode on Windows
         if platform.system() == "Windows":
-            dataset_num_proc = 1
-        else:
-            dataset_num_proc = training_config.get("dataset_num_proc", 2)
+            # Force environment variable to ensure single-process mode
+            import os
+            os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
-        # Create trainer
+        # Create trainer with dataset_text_field to use pre-formatted text
+        # This prevents SFTTrainer from doing its own multiprocess tokenization
         self.trainer = SFTTrainer(
             model=self.model,
             tokenizer=self.tokenizer,
             train_dataset=dataset,
-            dataset_text_field="text",
+            dataset_text_field="text",  # Use the pre-formatted "text" field directly
             max_seq_length=training_config.get("max_seq_length", 2048),
             data_collator=DataCollatorForSeq2Seq(tokenizer=self.tokenizer),
-            dataset_num_proc=dataset_num_proc,
             packing=training_config.get("packing", False),
             args=args,
+            dataset_num_proc=1,  # Force single process for dataset operations on all platforms
         )
 
         # Train
